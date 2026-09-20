@@ -84,12 +84,32 @@ rig_gui_vfo_create ()
     gtk_container_add (GTK_CONTAINER (vfobox), rig_gui_vfo_create_eq_button ());
     gtk_container_add (GTK_CONTAINER (vfobox), rig_gui_vfo_create_xchg_button ());*/
     
-    grid = gtk_table_new (4, 3, TRUE);
-    gtk_table_attach_defaults (GTK_TABLE (grid), rig_gui_vfo_create_toggle (), 0, 1, 0, 1);
-    gtk_table_attach_defaults (GTK_TABLE (grid), rig_gui_vfo_create_split_button (), 1, 2, 0, 1);
-    gtk_table_attach_defaults (GTK_TABLE (grid), rig_gui_vfo_create_eq_button (), 0, 1, 1, 2);
-    gtk_table_attach_defaults (GTK_TABLE (grid), rig_gui_vfo_create_xchg_button (),    1, 2, 1, 2);
-    gtk_table_attach_defaults (GTK_TABLE (grid), rig_gui_vfo_create_mem_button (), 0, 1, 2, 3);
+    grid = gtk_grid_new ();
+    gtk_grid_set_row_homogeneous (GTK_GRID (grid), TRUE);
+    gtk_grid_set_column_homogeneous (GTK_GRID (grid), TRUE);
+    {
+        GtkWidget *w;
+        w = rig_gui_vfo_create_toggle ();
+        gtk_widget_set_hexpand (w, TRUE);
+        gtk_widget_set_vexpand (w, TRUE);
+        gtk_grid_attach (GTK_GRID (grid), w, 0, 0, 1, 1);
+        w = rig_gui_vfo_create_split_button ();
+        gtk_widget_set_hexpand (w, TRUE);
+        gtk_widget_set_vexpand (w, TRUE);
+        gtk_grid_attach (GTK_GRID (grid), w, 1, 0, 1, 1);
+        w = rig_gui_vfo_create_eq_button ();
+        gtk_widget_set_hexpand (w, TRUE);
+        gtk_widget_set_vexpand (w, TRUE);
+        gtk_grid_attach (GTK_GRID (grid), w, 0, 1, 1, 1);
+        w = rig_gui_vfo_create_xchg_button ();
+        gtk_widget_set_hexpand (w, TRUE);
+        gtk_widget_set_vexpand (w, TRUE);
+        gtk_grid_attach (GTK_GRID (grid), w, 1, 1, 1, 1);
+        w = rig_gui_vfo_create_mem_button ();
+        gtk_widget_set_hexpand (w, TRUE);
+        gtk_widget_set_vexpand (w, TRUE);
+        gtk_grid_attach (GTK_GRID (grid), w, 0, 2, 1, 1);
+    }
     
     /* BAND UP/DOWN */
     /* XXX not yet implemented */
