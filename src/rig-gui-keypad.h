@@ -3,7 +3,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <gtk/gtktable.h>
+#include <gtk/gtkgrid.h>
 
 
 G_BEGIN_DECLS
@@ -20,7 +20,7 @@ typedef struct _GrigKeypadClass  GrigKeypadClass;
 
 struct _GrigKeypad
 {
-	GtkTable table;
+	GtkGrid table;
 
 	GtkWidget *buttons[10];
 	GtkWidget *enter;
@@ -31,7 +31,7 @@ struct _GrigKeypad
 
 struct _GrigKeypadClass
 {
-	GtkTableClass parent_class;
+	GtkGridClass parent_class;
 
 	void (* grig_keypad) (GrigKeypad *obj);
 };

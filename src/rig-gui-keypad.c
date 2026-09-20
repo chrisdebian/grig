@@ -95,7 +95,7 @@ rig_gui_keypad_key_press_cb(GtkWidget * widget, GdkEventKey *e, gpointer data)
     if (e->type != GDK_KEY_PRESS)
         return FALSE;
 
-    if (e->keyval == GDK_Insert) {
+    if (e->keyval == GDK_KEY_Insert) {
         rig_gui_keypad_enter_cb(widget, data);
         return TRUE;
     }
@@ -111,14 +111,14 @@ rig_gui_keypad_key_press_cb(GtkWidget * widget, GdkEventKey *e, gpointer data)
     }
 
     /* numeric keypad */
-    if (e->keyval >= GDK_KP_0 && e->keyval <= GDK_KP_9) {
+    if (e->keyval >= GDK_KEY_KP_0 && e->keyval <= GDK_KEY_KP_9) {
         g_signal_emit_by_name(self, "grig-keypad-num-pressed",
-                                e->keyval - GDK_KP_0);
+                                e->keyval - GDK_KEY_KP_0);
 
         return TRUE;
     }
 
-    if (e->keyval == GDK_Delete) {
+    if (e->keyval == GDK_KEY_Delete) {
         rig_gui_keypad_clear_cb(widget, data);
         return TRUE;
     }
@@ -142,8 +142,10 @@ grig_keypad_init(GrigKeypad * self)
 
     self->enabled = FALSE;
 
-    gtk_table_resize(GTK_TABLE(self), 3, 4);
-    gtk_table_set_homogeneous(GTK_TABLE(self), TRUE);
+    /* GtkGrid grows automatically as widgets are attached - no
+       upfront resize() call needed, unlike GtkTable. */
+    gtk_grid_set_row_homogeneous(GTK_GRID(self), TRUE);
+    gtk_grid_set_column_homogeneous(GTK_GRID(self), TRUE);
 
     /* create buttons 1 - 9 */
     for (i = 0; i < 3; i++) {
@@ -154,9 +156,10 @@ grig_keypad_init(GrigKeypad * self)
             self->buttons[index] =
                 rig_gui_keypad_create_button(index, self);
 
-            gtk_table_attach_defaults(GTK_TABLE(self),
-                            self->buttons[index], j,
-                            j + 1, i, i + 1);
+            gtk_widget_set_hexpand(self->buttons[index], TRUE);
+            gtk_widget_set_vexpand(self->buttons[index], TRUE);
+            gtk_grid_attach(GTK_GRID(self),
+                            self->buttons[index], j, i, 1, 1);
 
             gtk_widget_set_sensitive(self->buttons[index], FALSE);
         }
@@ -172,12 +175,18 @@ grig_keypad_init(GrigKeypad * self)
 
 
     /* attach CLR, 0, ENT */
-    gtk_table_attach_defaults(GTK_TABLE(self), self->clear, 0, 1, 3, 4);
+    gtk_widget_set_hexpand(self->clear, TRUE);
+    gtk_widget_set_vexpand(self->clear, TRUE);
+    gtk_grid_attach(GTK_GRID(self), self->clear, 0, 3, 1, 1);
 
-    gtk_table_attach_defaults(GTK_TABLE(self),
-                    self->buttons[0], 1, 2, 3, 4);
+    gtk_widget_set_hexpand(self->buttons[0], TRUE);
+    gtk_widget_set_vexpand(self->buttons[0], TRUE);
+    gtk_grid_attach(GTK_GRID(self),
+                    self->buttons[0], 1, 3, 1, 1);
 
-    gtk_table_attach_defaults(GTK_TABLE(self), self->enter, 2, 3, 3, 4);
+    gtk_widget_set_hexpand(self->enter, TRUE);
+    gtk_widget_set_vexpand(self->enter, TRUE);
+    gtk_grid_attach(GTK_GRID(self), self->enter, 2, 3, 1, 1);
 
 
     /* create new signals */
@@ -222,7 +231,7 @@ grig_keypad_get_type(void)
             (GInstanceInitFunc) grig_keypad_init,
         };
 
-        grig_keypad_type = g_type_register_static(GTK_TYPE_TABLE,
+        grig_keypad_type = g_type_register_static(GTK_TYPE_GRID,
                                 "GrigKeypad",
                                 &grig_keypad_info,
                                 0);
