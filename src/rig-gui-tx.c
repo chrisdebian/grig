@@ -126,7 +126,7 @@ rig_gui_tx_create ()
 			  G_CALLBACK (tx_window_destroy), NULL);
 
 
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), hbox);
+	gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), hbox);
 
 	visible = TRUE;
 
