@@ -172,7 +172,7 @@ rig_gui_message_window_init  ()
 		
 		gtk_window_set_default_size (GTK_WINDOW (window), 700, 300);
 
-		gtk_container_add (GTK_CONTAINER (GTK_DIALOG(window)->vbox), hbox);
+		gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area (GTK_DIALOG (window))), hbox);
 
 		/* connect response signal */
 		g_signal_connect (G_OBJECT (window), "response",
@@ -673,93 +673,110 @@ create_message_summary ()
 	gtk_label_set_markup (GTK_LABEL (sumlabel), "<b>0</b>");
 	gtk_misc_set_alignment (GTK_MISC (sumlabel), 1.0, 0.5);
 
-	/* create table and add widgets */
-	table = gtk_table_new (10, 2, TRUE);
-	gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+	/* create grid and add widgets */
+	table = gtk_grid_new ();
+	gtk_grid_set_row_homogeneous (GTK_GRID (table), TRUE);
+	gtk_grid_set_column_homogeneous (GTK_GRID (table), TRUE);
+	gtk_grid_set_column_spacing (GTK_GRID (table), 5);
 	gtk_container_set_border_width (GTK_CONTAINER (table), 10);
 
 	label = gtk_label_new (_("Hamlib"));
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   label,
-				   0, 1, 0, 1);
+	gtk_widget_set_hexpand (label, TRUE);
+	gtk_widget_set_vexpand (label, TRUE);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 0, 1, 1);
 
 	label = gtk_label_new (_("Grig"));
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   label,
-				   0, 1, 1, 2);
+	gtk_widget_set_hexpand (label, TRUE);
+	gtk_widget_set_vexpand (label, TRUE);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 1, 1, 1);
 
 	label = gtk_label_new (_("Other"));
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   label,
-				   0, 1, 2, 3);
+	gtk_widget_set_hexpand (label, TRUE);
+	gtk_widget_set_vexpand (label, TRUE);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 2, 1, 1);
 
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   gtk_hseparator_new (),
-				   0, 2, 3, 4);
+	{
+		GtkWidget *sep = gtk_hseparator_new ();
+		gtk_widget_set_hexpand (sep, TRUE);
+		gtk_widget_set_vexpand (sep, TRUE);
+		gtk_grid_attach (GTK_GRID (table), sep, 0, 3, 2, 1);
+	}
 
 	label = gtk_label_new (_("Bugs"));
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   label,
-				   0, 1, 4, 5);
+	gtk_widget_set_hexpand (label, TRUE);
+	gtk_widget_set_vexpand (label, TRUE);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 4, 1, 1);
 
 	label = gtk_label_new (_("Errors"));
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   label,
-				   0, 1, 5, 6);
+	gtk_widget_set_hexpand (label, TRUE);
+	gtk_widget_set_vexpand (label, TRUE);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 5, 1, 1);
 
 	label = gtk_label_new (_("Warning"));
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   label,
-				   0, 1, 6, 7);
+	gtk_widget_set_hexpand (label, TRUE);
+	gtk_widget_set_vexpand (label, TRUE);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 6, 1, 1);
 
 	label = gtk_label_new (_("Verbose"));
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   label,
-				   0, 1, 7, 8);
+	gtk_widget_set_hexpand (label, TRUE);
+	gtk_widget_set_vexpand (label, TRUE);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 7, 1, 1);
 
 	label = gtk_label_new (_("Trace"));
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   label,
-				   0, 1, 8, 9);
+	gtk_widget_set_hexpand (label, TRUE);
+	gtk_widget_set_vexpand (label, TRUE);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 8, 1, 1);
 
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   gtk_hseparator_new (),
-				   0, 2, 9, 10);
+	{
+		GtkWidget *sep = gtk_hseparator_new ();
+		gtk_widget_set_hexpand (sep, TRUE);
+		gtk_widget_set_vexpand (sep, TRUE);
+		gtk_grid_attach (GTK_GRID (table), sep, 0, 9, 2, 1);
+	}
 
 	label = gtk_label_new (NULL);
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
 	gtk_label_set_markup (GTK_LABEL (label), _("<b>Total</b>"));
-	gtk_table_attach_defaults (GTK_TABLE (table),
-				   label,
-				   0, 1, 10, 11);
+	gtk_widget_set_hexpand (label, TRUE);
+	gtk_widget_set_vexpand (label, TRUE);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 10, 1, 1);
 
-	gtk_table_attach_defaults (GTK_TABLE (table), hamliblabel,
-				   1, 2, 0, 1);
-	gtk_table_attach_defaults (GTK_TABLE (table), griglabel,
-				   1, 2, 1, 2);
-	gtk_table_attach_defaults (GTK_TABLE (table), otherlabel,
-				   1, 2, 2, 3);
-	gtk_table_attach_defaults (GTK_TABLE (table), buglabel,
-				   1, 2, 4, 5);
-	gtk_table_attach_defaults (GTK_TABLE (table), errlabel,
-				   1, 2, 5, 6);
-	gtk_table_attach_defaults (GTK_TABLE (table), warnlabel,
-				   1, 2, 6, 7);
-	gtk_table_attach_defaults (GTK_TABLE (table), verblabel,
-				   1, 2, 7, 8);
-	gtk_table_attach_defaults (GTK_TABLE (table), tracelabel,
-				   1, 2, 8, 9);
-	gtk_table_attach_defaults (GTK_TABLE (table), sumlabel,
-				   1, 2, 10, 11);
+	gtk_widget_set_hexpand (hamliblabel, TRUE);
+	gtk_widget_set_vexpand (hamliblabel, TRUE);
+	gtk_grid_attach (GTK_GRID (table), hamliblabel, 1, 0, 1, 1);
+	gtk_widget_set_hexpand (griglabel, TRUE);
+	gtk_widget_set_vexpand (griglabel, TRUE);
+	gtk_grid_attach (GTK_GRID (table), griglabel, 1, 1, 1, 1);
+	gtk_widget_set_hexpand (otherlabel, TRUE);
+	gtk_widget_set_vexpand (otherlabel, TRUE);
+	gtk_grid_attach (GTK_GRID (table), otherlabel, 1, 2, 1, 1);
+	gtk_widget_set_hexpand (buglabel, TRUE);
+	gtk_widget_set_vexpand (buglabel, TRUE);
+	gtk_grid_attach (GTK_GRID (table), buglabel, 1, 4, 1, 1);
+	gtk_widget_set_hexpand (errlabel, TRUE);
+	gtk_widget_set_vexpand (errlabel, TRUE);
+	gtk_grid_attach (GTK_GRID (table), errlabel, 1, 5, 1, 1);
+	gtk_widget_set_hexpand (warnlabel, TRUE);
+	gtk_widget_set_vexpand (warnlabel, TRUE);
+	gtk_grid_attach (GTK_GRID (table), warnlabel, 1, 6, 1, 1);
+	gtk_widget_set_hexpand (verblabel, TRUE);
+	gtk_widget_set_vexpand (verblabel, TRUE);
+	gtk_grid_attach (GTK_GRID (table), verblabel, 1, 7, 1, 1);
+	gtk_widget_set_hexpand (tracelabel, TRUE);
+	gtk_widget_set_vexpand (tracelabel, TRUE);
+	gtk_grid_attach (GTK_GRID (table), tracelabel, 1, 8, 1, 1);
+	gtk_widget_set_hexpand (sumlabel, TRUE);
+	gtk_widget_set_vexpand (sumlabel, TRUE);
+	gtk_grid_attach (GTK_GRID (table), sumlabel, 1, 10, 1, 1);
 
 	/* frame around the table */
 	frame = gtk_frame_new (_(" Summary "));
