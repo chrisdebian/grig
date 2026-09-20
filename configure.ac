@@ -31,7 +31,7 @@ if test "${ac_cv_c_compiler_gnu}" = "yes"; then
   CFLAGS="${CFLAGS} -Wall"
 fi
 
-pkg_modules="gtk+-2.0 >= 2.24.0 gthread-2.0 >= 2.14.0"
+pkg_modules="gtk+-3.0 gthread-2.0 >= 2.14.0"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
@@ -83,8 +83,8 @@ dnl store library versions
 HAMLIB_V=`pkg-config --modversion hamlib`
 GLIB_V=`pkg-config --modversion glib-2.0`
 GTHR_V=`pkg-config --modversion gthread-2.0`
-GDK_V=`pkg-config --modversion gdk-2.0`
-GTK_V=`pkg-config --modversion gtk+-2.0`
+GDK_V=`pkg-config --modversion gdk-3.0`
+GTK_V=`pkg-config --modversion gtk+-3.0`
 
 AC_DEFINE_UNQUOTED([HAMLIB_VERSION],[`pkg-config --modversion hamlib`],["Hamlib version"])
 
