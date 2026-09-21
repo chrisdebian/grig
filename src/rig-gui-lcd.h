@@ -87,8 +87,6 @@ typedef struct {
  */
 typedef struct {
 	GtkWidget        *canvas;          /*!< The main canvas. */
-	GdkGC            *gc1;             /*!< Graphics context (normal). */
-	GdkGC            *gc2;             /*!< Graphics context (inverted). */
 	guint             width;           /*!< Canvas width. */
 	guint             height;          /*!< Canvas height. */
 	lcd_coor_t        digits[13];      /*!< Starting points for all digits. */

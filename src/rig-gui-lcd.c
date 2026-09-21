@@ -75,6 +75,7 @@
  */
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <pango/pangocairo.h>
 #include <glib/gi18n.h>
 #include <stdlib.h>
 #include <math.h>
@@ -122,18 +123,17 @@ static GdkPixbuf *digits_normal[13];
 static GdkPixbuf *digits_small[13];
 
 
-static GdkPixmap *buffer;
-
 lcd_t lcd;
 
 /* private function prototypes */
 static void           rig_gui_lcd_load_digits      (const gchar *fname);
-static gboolean       rig_gui_lcd_expose_cb        (GtkWidget *, GdkEventExpose *, gpointer);
+static gboolean       rig_gui_lcd_draw_cb          (GtkWidget *, cairo_t *, gpointer);
 static gboolean       rig_gui_lcd_handle_event     (GtkWidget *, GdkEvent *, gpointer);
 static event_object_t rig_gui_lcd_get_event_object (GdkEvent *event);
 static void           rig_gui_lcd_calc_dim         (void);
-static void           rig_gui_lcd_draw_text        (void);
-static void           rig_gui_lcd_draw_digit       (gint position, char digit);
+static void           rig_gui_lcd_draw_text        (cairo_t *cr);
+static void           rig_gui_lcd_draw_vfo_text    (cairo_t *cr);
+static gint            rig_gui_lcd_char_to_index   (gchar digit);
 
 static gint           rig_gui_lcd_timeout_exec     (gpointer);
 static gint           rig_gui_lcd_timeout_stop     (GtkWidget *, GdkEvent *, gpointer);
@@ -182,11 +182,11 @@ rig_gui_lcd_create ()
 	lcd.canvas = gtk_drawing_area_new ();
 	gtk_widget_set_size_request (lcd.canvas, lcd.width, lcd.height);
 
-	/* connect expose handler which will take care of adding
+	/* connect draw handler which will take care of adding
 	   contents.
 	*/
-	g_signal_connect (G_OBJECT (lcd.canvas), "expose_event",  
-                      G_CALLBACK (rig_gui_lcd_expose_cb), NULL);	
+	g_signal_connect (G_OBJECT (lcd.canvas), "draw",
+                      G_CALLBACK (rig_gui_lcd_draw_cb), NULL);
 
 	/* connect mouse events but only if rig has set_freq;
 	   XXX THIS IS A BUG SINCE WE DON'T DISTINGUISH BETWEEN SET_FREQ
@@ -354,96 +354,119 @@ rig_gui_lcd_load_digits (const gchar *name)
 }
 
 
-/** \brief Handle expose events for the drawing area.
+/** \brief Draw the whole LCD display.
  *  \param widget The drawing area widget.
- *  \param event  The event.
+ *  \param cr     Cairo context to draw with, supplied by GTK.
  *  \param data   User data; always NULL.
- * 
- * This function is called when the drawing area widget is finalized
- * and exposed. It is used to finish the initialization of those
- * parameters, which need attributes from visible widgets.
+ *
+ * GTK3's Cairo drawing model only allows drawing inside this "draw" signal
+ * handler — unlike the GTK2 "expose_event" this replaces, nothing drawn
+ * outside of here persists. So unlike the old expose handler (which only
+ * ran occasionally and relied on the window's own backing store to keep
+ * previously-drawn digits visible in between), this redraws the entire
+ * display from current state (lcd.freqs1/lcd.rits/lcd.vfo etc.) on every
+ * single call. All the rig_gui_lcd_set_*()/rig_gui_lcd_update_vfo()
+ * functions now only update that state and call gtk_widget_queue_draw()
+ * when something actually changed, instead of drawing directly.
  *
  * \bug canvas height is hadcoded according to smeter height.
- *
- * \bug recreates graphics context on every call (memory leak)
- */ 
+ */
 static gboolean
-rig_gui_lcd_expose_cb   (GtkWidget      *widget,
-                         GdkEventExpose *event,
-                         gpointer        data)
+rig_gui_lcd_draw_cb   (GtkWidget *widget,
+                       cairo_t   *cr,
+                       gpointer   data)
 {
-
 	guint i;
+	gint  idx;
 
-	/* finalize the graphics context */
-	lcd.gc1 = gdk_gc_new (GDK_DRAWABLE (widget->window));
-	gdk_gc_set_rgb_fg_color (lcd.gc1, &lcd.fg);
-	gdk_gc_set_rgb_bg_color (lcd.gc1, &lcd.bg);
-	gdk_gc_set_line_attributes (lcd.gc1, 1,
-                                GDK_LINE_SOLID,
-                                GDK_CAP_ROUND,
-                                GDK_JOIN_ROUND);
-
-	lcd.gc2 = gdk_gc_new (GDK_DRAWABLE (widget->window));
-	gdk_gc_set_rgb_fg_color (lcd.gc2, &lcd.bg);
-	gdk_gc_set_rgb_bg_color (lcd.gc2, &lcd.fg);
-	gdk_gc_set_line_attributes (lcd.gc2, 1,
-                                GDK_LINE_SOLID,
-                                GDK_CAP_ROUND,
-                                GDK_JOIN_ROUND);
-
-				    
-	/* draw border around the meter */
-	gdk_draw_rectangle (GDK_DRAWABLE (widget->window), lcd.gc2,
-                        TRUE, 0, 0, lcd.width, lcd.height);
-
-	gdk_draw_rectangle (GDK_DRAWABLE (widget->window), lcd.gc1,
-                        FALSE, 0, 0, lcd.width-1, lcd.height-1);
-
-
-	/* force digit update by clearing internal string buffer */
-	for (i=0; i<10; i++) {
-		lcd.freqs1[i] = 'X';
-	}
-	rig_gui_lcd_set_freq_digits (lcd.freq1);
-
-	/* force digit update by clearing internal string buffer */
-	for (i=0; i<4; i++) {
-		lcd.rits[i] = 'X';
-	}
-	rig_gui_lcd_set_rit_digits (lcd.rit);
-
-	/* large dot */
-	gdk_draw_pixbuf (GDK_DRAWABLE (widget->window), NULL, digits_normal[12],
-	                 0, 0, lcd.dots[0].x, lcd.dots[0].y, -1, -1,
-	                 GDK_RGB_DITHER_NONE, 0, 0);
-
-	/* small dot */
-	gdk_draw_pixbuf (GDK_DRAWABLE (widget->window), NULL, digits_small[12],
-	                 0, 0, lcd.dots[1].x, lcd.dots[1].y, -1, -1,
-	                 GDK_RGB_DITHER_NONE, 0, 0);
-
-
-
-
-	/* initialize offscreen buffer */
-	buffer = gdk_pixmap_new (GDK_DRAWABLE (lcd.canvas->window),
-                             lcd.width, lcd.height, -1);
-
-	/* draw text */
-	rig_gui_lcd_draw_text ();
-
-	/* force VFO update by clearing internal vfo state */
-	lcd.vfo = RIG_VFO_NONE;
-	rig_gui_lcd_update_vfo ();
-
-	/* indicate that widget is ready to 
-	   be used
-	*/
 	lcd.exposed = TRUE;
 
+	/* background fill, then a crisp 1px border on top */
+	cairo_set_source_rgb (cr, lcd.bg.red / 65535.0, lcd.bg.green / 65535.0,
+	                      lcd.bg.blue / 65535.0);
+	cairo_rectangle (cr, 0, 0, lcd.width, lcd.height);
+	cairo_fill (cr);
+
+	cairo_set_source_rgb (cr, lcd.fg.red / 65535.0, lcd.fg.green / 65535.0,
+	                      lcd.fg.blue / 65535.0);
+	cairo_set_line_width (cr, 1);
+	cairo_rectangle (cr, 0.5, 0.5, lcd.width - 1, lcd.height - 1);
+	cairo_stroke (cr);
+
+	/* large dot */
+	gdk_cairo_set_source_pixbuf (cr, digits_normal[12],
+	                             lcd.dots[0].x, lcd.dots[0].y);
+	cairo_paint (cr);
+
+	/* small dot */
+	gdk_cairo_set_source_pixbuf (cr, digits_small[12],
+	                             lcd.dots[1].x, lcd.dots[1].y);
+	cairo_paint (cr);
+
+	/* frequency digits: positions 0..6 use the large pixmaps, 7..9 the
+	   small ones (see rig_gui_lcd_calc_dim for the coordinates). */
+	for (i = 0; i < 10; i++) {
+		idx = rig_gui_lcd_char_to_index (lcd.freqs1[i]);
+		if (idx < 0)
+			continue;
+		gdk_cairo_set_source_pixbuf (cr,
+		                             (i < 7) ? digits_normal[idx] : digits_small[idx],
+		                             lcd.digits[i].x, lcd.digits[i].y);
+		cairo_paint (cr);
+	}
+
+	/* RIT sign, drawn just to the left of the first RIT digit; ' '
+	   means "no sign" (cleared) and is drawn same as '-' would be but
+	   with the space glyph, matching the original behaviour. */
+	if ((lcd.rits[0] == ' ') || (lcd.rits[0] == '-')) {
+		idx = (lcd.rits[0] == '-') ? 11 : 10;
+		gdk_cairo_set_source_pixbuf (cr, digits_small[idx],
+		                             lcd.digits[10].x - lcd.dsw, lcd.digits[10].y);
+		cairo_paint (cr);
+	}
+
+	/* RIT digits */
+	for (i = 1; i < 4; i++) {
+		idx = rig_gui_lcd_char_to_index (lcd.rits[i]);
+		if (idx < 0)
+			continue;
+		gdk_cairo_set_source_pixbuf (cr, digits_small[idx],
+		                             lcd.digits[i+9].x, lcd.digits[i+9].y);
+		cairo_paint (cr);
+	}
+
+	rig_gui_lcd_draw_text (cr);
+	rig_gui_lcd_draw_vfo_text (cr);
 
 	return TRUE;
+}
+
+
+/** \brief Map a displayed character to its index in digits_normal/digits_small.
+ *  \param digit The character currently shown at some position.
+ *  \return The pixmap index (0-9 for '0'-'9', 10 for ' ', 11 for '-'),
+ *          or -1 if digit doesn't correspond to a real pixmap (e.g. the
+ *          'X' sentinel used to mark a position as "not yet drawn").
+ */
+static gint
+rig_gui_lcd_char_to_index (gchar digit)
+{
+	switch (digit) {
+
+	case '0': return 0;
+	case '1': return 1;
+	case '2': return 2;
+	case '3': return 3;
+	case '4': return 4;
+	case '5': return 5;
+	case '6': return 6;
+	case '7': return 7;
+	case '8': return 8;
+	case '9': return 9;
+	case ' ': return 10;
+	case '-': return 11;
+	default:  return -1;
+	}
 }
 
 
@@ -467,7 +490,7 @@ rig_gui_lcd_expose_cb   (GtkWidget      *widget,
  *
  * \bug Cyclomatic omplexity to high?
  *
- * \sa rig_gui_lcd_expose_cb, rig_gui_lcd_get_event_object
+ * \sa rig_gui_lcd_draw_cb, rig_gui_lcd_get_event_object
  */
 static gboolean
 rig_gui_lcd_handle_event     (GtkWidget *widget,
@@ -482,13 +505,11 @@ rig_gui_lcd_handle_event     (GtkWidget *widget,
 	guint          power;      /* usd for 10**power */
 	gchar         *str;
 
-	/* in case of expose-event call the expose event handler */
 	switch (event->type) {
 
-		/* drawing area has been exposed */
-	case GDK_EXPOSE:
-		return rig_gui_lcd_expose_cb (widget, (GdkEventExpose *) event, data);
-		break;
+		/* Exposure/redraw is handled entirely by the separately-
+		   connected "draw" signal (rig_gui_lcd_draw_cb) under GTK3
+		   — there is no GDK_EXPOSE case here any more. */
 
 		/* button press */
 	case GDK_BUTTON_PRESS:
@@ -989,79 +1010,15 @@ rig_gui_lcd_set_freq_digits  (freq_t freq)
 			changed = TRUE;
 
 			lcd.freqs1[i] = str[i];
-
-			rig_gui_lcd_draw_digit(i, str[i]);
 		}
 	}
 
 	g_free(str);
 
-	if (changed)
+	if (changed) {
+		gtk_widget_queue_draw (lcd.canvas);
 		g_signal_emit_by_name(lcd.canvas, "freq-changed");
-}
-
-static void
-rig_gui_lcd_draw_digit(gint position, char digit)
-{
-	gint ipixmap; /* index in pixmap */
-
-	switch (digit) {
-
-	case '0':
-		ipixmap = 0;
-		break;
-
-	case '1':
-		ipixmap = 1;
-		break;
-
-	case '2':
-		ipixmap = 2;
-		break;
-
-	case '3':
-		ipixmap = 3;
-		break;
-
-	case '4':
-		ipixmap = 4;
-		break;
-
-	case '5':
-		ipixmap = 5;
-		break;
-
-	case '6':
-		ipixmap = 6;
-		break;
-
-	case '7':
-		ipixmap = 7;
-		break;
-
-	case '8':
-		ipixmap = 8;
-		break;
-
-	case '9':
-		ipixmap = 9;
-		break;
-
-	case ' ':
-		ipixmap = 10;
-		break;
-
-	case '-':
-		ipixmap = 11;
-		break;
-
-	default: /* critical error */
-		return;
 	}
-	gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL,
-	                 (position < 7) ? digits_normal[ipixmap] : digits_small[ipixmap],
-	                 0, 0, lcd.digits[position].x, lcd.digits[position].y, -1, -1,
-	                 GDK_RGB_DITHER_NONE, 0, 0);
 }
 
 void
@@ -1076,7 +1033,8 @@ rig_gui_lcd_set_next_digit(char n)
 
 	lcd.freqm += pow(10, 9 - lcd.digit) * (n - '0');
 
-	rig_gui_lcd_draw_digit(lcd.digit, n);
+	lcd.freqs1[lcd.digit] = n;
+	gtk_widget_queue_draw (lcd.canvas);
 
 	/* increment for next digit */
 	lcd.digit++;
@@ -1122,12 +1080,9 @@ rig_gui_lcd_begin_manual_entry  (void)
 	lcd.freqm = 0;
 
 	for (i = 0; i < 10; i++) {
-
-		gdk_draw_pixbuf (GDK_DRAWABLE(lcd.canvas->window), NULL,
-			(i < 7) ? digits_normal[11] : digits_small[11],
-			0, 0, lcd.digits[i].x, lcd.digits[i].y, -1, -1,
-			GDK_RGB_DITHER_NONE, 0, 0);
+		lcd.freqs1[i] = '-';
 	}
+	gtk_widget_queue_draw (lcd.canvas);
 }
 
 void
@@ -1173,6 +1128,7 @@ rig_gui_lcd_set_rit_digits   (shortfreq_t freq)
 {
 	gchar *str;
 	guint i;
+	gboolean changed = FALSE;
 
 	/* is drawing area ready? */
 	if (!lcd.exposed)
@@ -1193,114 +1149,24 @@ rig_gui_lcd_set_rit_digits   (shortfreq_t freq)
 	str = g_strdup ("-0000");
 	ritval_to_bytearr (str, freq);
 
-	/* 0th element is the sign;
-	   must be handled separately because ' ' means clear and not 0
+	/* for each digit (0th element is the sign) check whether the new
+	   value is different from the one already being displayed; if so,
+	   update state and let rig_gui_lcd_draw_cb draw it on the next
+	   redraw.
 	*/
-	if (str[0] != lcd.rits[0]) {
-
-        lcd.rits[0] = str[0];
-
-        switch (str[0]) {
-
-        case ' ':
-            gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL,
-                             digits_small[10], 0, 0,
-                             lcd.digits[10].x - lcd.dsw, lcd.digits[10].y,
-                             -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
-            break;
-
-        case '-':
-            gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL,
-                             digits_small[11], 0, 0,
-                             lcd.digits[10].x - lcd.dsw, lcd.digits[10].y,
-                             -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
-            break;
-
-        default: /* critical internal error */
-            break;
-        }
-	}
- 
-	/* for each digit check whether the new digit is different from the one
-	   already being displayed; if yes, draw the new digit, otherwise do
-	   nothing.
-	*/
-	for (i=1; i<4; i++) {
+	for (i=0; i<4; i++) {
 
 		if (str[i] != lcd.rits[i]) {
 
 			lcd.rits[i] = str[i];
-
-			switch (str[i]) {
-
-			case '0':
-			case ' ':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[0],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			case '1':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[1],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			case '2':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[2],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			case '3':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[3],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			case '4':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[4],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			case '5':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[5],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			case '6':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[6],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			case '7':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[7],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			case '8':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[8],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			case '9':
-				gdk_draw_pixbuf (GDK_DRAWABLE (lcd.canvas->window), NULL, digits_small[9],
-                                 0, 0, lcd.digits[i+9].x, lcd.digits[i+9].y, -1, -1,
-                                 GDK_RGB_DITHER_NONE, 0, 0);
-				break;
-
-			default: /* critical internal error */
-				break;
-			}  /* case */
-		} /* if */
-	} /* for */
+			changed = TRUE;
+		}
+	}
 
 	g_free (str);
+
+	if (changed)
+		gtk_widget_queue_draw (lcd.canvas);
 }
 
 
@@ -1378,12 +1244,15 @@ rig_gui_lcd_timeout_stop (GtkWidget *widget,
 
 
 /** \brief Draw miscellaneous text.
+ *  \param cr Cairo context to draw with (from rig_gui_lcd_draw_cb).
  *
  * This function is in charge of drawing miscellaneous text on the display,
- * like RIT, kHz and such.
+ * like RIT, kHz and such. Called on every redraw now — cheap enough for
+ * two short static labels that recomputing the Pango layout each time
+ * isn't worth caching.
  */
 static void
-rig_gui_lcd_draw_text        ()
+rig_gui_lcd_draw_text        (cairo_t *cr)
 {
 
 	PangoContext *context;
@@ -1397,6 +1266,9 @@ rig_gui_lcd_draw_text        ()
 	/* create a new PangoLayout */
 	layout  = pango_layout_new (context);
 
+	cairo_set_source_rgb (cr, lcd.fg.red / 65535.0, lcd.fg.green / 65535.0,
+	                      lcd.fg.blue / 65535.0);
+
 	/* set text: kHz */
 	pango_layout_set_text (layout, _("kHz"), -1);
 
@@ -1407,20 +1279,14 @@ rig_gui_lcd_draw_text        ()
 	w /= 1000; h /= 1000;
 
 	/* draw text; frequency */
-	gdk_draw_layout (lcd.canvas->window,
-                     lcd.gc1,
-                     lcd.digits[9].x + lcd.dsw + 5,
-                     lcd.digits[9].y + lcd.dsh - h,
-                     layout);
+	cairo_move_to (cr, lcd.digits[9].x + lcd.dsw + 5,
+	              lcd.digits[9].y + lcd.dsh - h);
+	pango_cairo_show_layout (cr, layout);
 
 	/* draw text; rit */
-	gdk_draw_layout (lcd.canvas->window,
-                     lcd.gc1,
-                     lcd.digits[12].x + lcd.dsw + 5,
-                     lcd.digits[12].y + lcd.dsh - h,
-                     layout);
-
-	rig_gui_lcd_update_vfo ();
+	cairo_move_to (cr, lcd.digits[12].x + lcd.dsw + 5,
+	              lcd.digits[12].y + lcd.dsh - h);
+	pango_cairo_show_layout (cr, layout);
 
 	/* set text: RIT */
 	pango_layout_set_text (layout, _("RIT"), -1);
@@ -1432,11 +1298,8 @@ rig_gui_lcd_draw_text        ()
 	w /= 1000; h /= 1000;
 
 	/* draw text; RIT */
-	gdk_draw_layout (lcd.canvas->window,
-                     lcd.gc1,
-                     lcd.digits[11].x,
-                     lcd.digits[0].y - h,
-                     layout);
+	cairo_move_to (cr, lcd.digits[11].x, lcd.digits[0].y - h);
+	pango_cairo_show_layout (cr, layout);
 
 
 	/* free PangoLayout */
@@ -1444,34 +1307,26 @@ rig_gui_lcd_draw_text        ()
 }
 
 
+/** \brief Draw the current VFO label.
+ *  \param cr Cairo context to draw with (from rig_gui_lcd_draw_cb).
+ *
+ * Purely reads lcd.vfo and draws it — no need to "clear" the old label
+ * first any more, since the whole background is repainted before this is
+ * called on every redraw. State updates (deciding whether the VFO has
+ * actually changed, and queuing a redraw if so) live in
+ * rig_gui_lcd_update_vfo() instead.
+ */
 static void
-rig_gui_lcd_update_vfo ()
+rig_gui_lcd_draw_vfo_text (cairo_t *cr)
 {
 	PangoContext *context;
 	PangoLayout  *layout;
 	gint          w,h;
-	vfo_t         vfo;
 
-	/* is drawing area ready? */
-	if (!lcd.exposed)
-		return;
-
-	/* if the VFO is the same as the displayed one, don't do anything */
-	vfo = rig_data_get_vfo ();
-	if (vfo == lcd.vfo)
-		return;
-
-	lcd.vfo = vfo; 
-
-	/* set text: VFO */
-	/* get the PangoContext of the widget */
 	context = gtk_widget_get_pango_context (lcd.canvas);
-
-	/* create a new PangoLayout */
 	layout  = pango_layout_new (context);
 
-
-	switch (vfo) {
+	switch (lcd.vfo) {
 
 	case RIG_VFO_A:
 		pango_layout_set_text (layout, _("VFO A"), -1);
@@ -1502,32 +1357,41 @@ rig_gui_lcd_update_vfo ()
 		break;
 	}
 
-
-	/* calculate coordinates;
-	   PanoLayoutSize is in 1000th of pixel?
-	*/
 	pango_layout_get_size (layout, &w, &h);
 	w /= 1000; h /= 1000;
 
-	/* clear the area */
-	gdk_draw_rectangle (GDK_DRAWABLE (lcd.canvas->window),
-                        lcd.gc2,
-                        TRUE,
-                        lcd.digits[5].x,
-                        lcd.digits[0].y - h,
-                        2*w,
-                        h);
-
-
-	/* draw text */
-	gdk_draw_layout (lcd.canvas->window,
-                     lcd.gc1,
-                     lcd.digits[5].x,
-                     lcd.digits[0].y - h,
-                     layout);
+	cairo_set_source_rgb (cr, lcd.fg.red / 65535.0, lcd.fg.green / 65535.0,
+	                      lcd.fg.blue / 65535.0);
+	cairo_move_to (cr, lcd.digits[5].x, lcd.digits[0].y - h);
+	pango_cairo_show_layout (cr, layout);
 
 	/* free PangoLayout */
 	g_object_unref (G_OBJECT (layout));
+}
+
+
+/** \brief Check for a VFO change and queue a redraw if it changed.
+ *
+ * Actual drawing of the VFO label now happens in
+ * rig_gui_lcd_draw_vfo_text(), called from rig_gui_lcd_draw_cb() on every
+ * redraw — this function is now purely about state.
+ */
+static void
+rig_gui_lcd_update_vfo ()
+{
+	vfo_t vfo;
+
+	/* is drawing area ready? */
+	if (!lcd.exposed)
+		return;
+
+	/* if the VFO is the same as the displayed one, don't do anything */
+	vfo = rig_data_get_vfo ();
+	if (vfo == lcd.vfo)
+		return;
+
+	lcd.vfo = vfo;
+	gtk_widget_queue_draw (lcd.canvas);
 }
 
 /** \brief Convert RIT value to byte array.
