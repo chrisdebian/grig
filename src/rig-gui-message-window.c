@@ -239,7 +239,7 @@ void
 rig_gui_message_window_hide  ()
 {
 	if (visible) {
-		gtk_widget_hide_all (window);
+		gtk_widget_hide (window); /* gtk_widget_hide_all removed in GTK3 */
 		visible = FALSE;
 	}
 }
@@ -368,7 +368,7 @@ message_window_response (GtkWidget *widget,
 
 		/* close button */
 	case GTK_RESPONSE_CLOSE:
-		gtk_widget_hide_all (widget);
+		gtk_widget_hide (widget); /* gtk_widget_hide_all removed in GTK3 */
 		visible = FALSE;
 		break;
 

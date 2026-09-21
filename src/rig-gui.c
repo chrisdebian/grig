@@ -84,7 +84,7 @@ void rig_gui_show_keypad (gboolean *show)
             gtk_widget_show_all (keypadbox);
         }
         else {
-            gtk_widget_hide_all (keypadbox);
+            gtk_widget_hide (keypadbox); /* gtk_widget_hide_all removed in GTK3 */
         }
     }
 } 

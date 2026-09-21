@@ -152,7 +152,8 @@ main (int argc, char *argv[])
 	textdomain (PACKAGE);
 #endif
 
-	gtk_set_locale ();
+	/* gtk_set_locale() removed in GTK3 - gtk_init() calls setlocale()
+	   itself now. */
 	gtk_init (&argc, &argv);
 /* 	setlocale (LCNUMERIC, "C"); */
 
