@@ -102,7 +102,7 @@ static gboolean rig_gui_smeter_timeout_stop (GtkWidget *, GdkEvent *, gpointer);
 static void rig_gui_smeter_mode_cb     (GtkWidget *, gpointer);
 static void rig_gui_smeter_scale_cb    (GtkWidget *, gpointer);
 
-static gboolean rig_gui_smeter_expose_cb (GtkWidget *, GdkEventExpose *, gpointer);
+static gboolean rig_gui_smeter_draw_cb   (GtkWidget *, cairo_t *, gpointer);
 static void rig_gui_smeter_draw_cr       (cairo_t *);
 
 static gboolean rig_gui_smeter_has_tx_mode (guint);
@@ -209,9 +209,9 @@ rig_gui_smeter_create_canvas ()
                                  RIG_GUI_SMETER_WIDTH,
                                  RIG_GUI_SMETER_HEIGHT);
 
-    /* connect expose handler which will take care of adding contents. */
-    g_signal_connect (G_OBJECT (smeter.canvas), "expose_event",
-                      G_CALLBACK (rig_gui_smeter_expose_cb), NULL);
+    /* connect draw handler which will take care of adding contents. */
+    g_signal_connect (G_OBJECT (smeter.canvas), "draw",
+                      G_CALLBACK (rig_gui_smeter_draw_cb), NULL);
 
 }
 
@@ -520,25 +520,27 @@ rig_gui_smeter_scale_cb   (GtkWidget *widget, gpointer data)
 static void
 rig_gui_smeter_draw_cr(cairo_t *cr)
 {
-    GdkColor color = {
-        .red   = 0x3b,
-        .green = 0x34,
-        .blue  = 0x28
-    };
+    /* needle/border colour — matches the pre-existing GdkColor values
+       (0x3b, 0x34, 0x28) exactly, normalised the same way rig-gui-lcd.c's
+       own GTK3 port normalises its GdkColor fields (/65535.0), since these
+       are still 16-bit-range GdkColor-style values, not 8-bit. */
+    const gdouble needle_r = 0x3b / 65535.0;
+    const gdouble needle_g = 0x34 / 65535.0;
+    const gdouble needle_b = 0x28 / 65535.0;
 
     /* draw background pixmap */
     gdk_cairo_set_source_pixbuf (cr, smeter.pixbuf, 0, 0);
     cairo_paint (cr);
 
     /* draw needle */
-    gdk_cairo_set_source_color (cr, &color);
+    cairo_set_source_rgb (cr, needle_r, needle_g, needle_b);
     cairo_set_line_width (cr, 1.5);
     cairo_move_to (cr, coor.x1, coor.y1);
     cairo_line_to (cr, coor.x2, coor.y2);
     cairo_stroke (cr);
 
     /* draw border around the meter */
-    gdk_cairo_set_source_color (cr, &color);
+    cairo_set_source_rgb (cr, needle_r, needle_g, needle_b);
     cairo_set_line_width (cr, 1);
     cairo_rectangle (cr, 0, 0,
                      RIG_GUI_SMETER_WIDTH,
@@ -550,24 +552,23 @@ rig_gui_smeter_draw_cr(cairo_t *cr)
 }
 
 
-/** \brief Handle expose events for the drawing area.
+/** \brief Handle draw events for the drawing area.
  *  \param widget The drawing area widget.
- *  \param event  The event.
+ *  \param cr     Cairo context to draw with, supplied by GTK.
  *  \param data   User data; always NULL.
  *
- * This function is called when the rawing area widget is finalized
- * and exposed. Itis used to finish the initialization of those
- * parameters, which need attributes rom visible widgets.
+ * GTK3's "draw" signal hands the handler a ready-to-use cairo_t for the
+ * widget directly, unlike GTK2's "expose_event" (which only gave a
+ * GdkEventExpose, requiring gdk_cairo_create() on the widget's GdkWindow
+ * to get a context at all) — so this no longer needs to create or destroy
+ * its own cairo context, just draw into the one it's given.
  */
 static gboolean
-rig_gui_smeter_expose_cb (GtkWidget      *widget,
-                          GdkEventExpose *event,
-                          gpointer        data)
+rig_gui_smeter_draw_cb (GtkWidget *widget,
+                        cairo_t   *cr,
+                        gpointer   data)
 {
-    GdkWindow *window = gtk_widget_get_window (widget);
-    cairo_t *cr = gdk_cairo_create (window);
     rig_gui_smeter_draw_cr (cr);
-    cairo_destroy (cr);
     return TRUE;
 }
 
