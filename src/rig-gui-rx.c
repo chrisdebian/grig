@@ -122,7 +122,10 @@ rig_gui_rx_create ()
  	g_signal_connect (dialog, "destroy",
 			  G_CALLBACK (rx_window_destroy), NULL);
 
-	gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), hbox);
+	/* GTK2's container_add expanded box children by default; GTK3's does not,
+	   which collapsed the level sliders to zero height, so pack explicitly */
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
+			    hbox, TRUE, TRUE, 0);
 
 	visible = TRUE;
 
