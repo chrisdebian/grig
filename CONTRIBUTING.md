@@ -43,7 +43,7 @@ make
 
 **Dependencies** (development packages, not just the runtime libraries):
 
-* `gtk+-2.0` — at least version 2.24.0
+* `gtk+-3.0` — at least version 3.24
 * `gthread-2.0` — at least version 2.14.0
 * `hamlib` — at least version 4.2
 

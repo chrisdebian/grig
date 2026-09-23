@@ -27,7 +27,7 @@ sudo make install
 You likely miss some of the required libraries if you get any error messages during
  `configure`. These are:
 
-* `gtk+-2.0`      at least version 2.24.0
+* `gtk+-3.0`      at least version 3.24
 * `gthread-2.0`   at least version 2.14.0
 * `hamlib`        at least version 4.2
 

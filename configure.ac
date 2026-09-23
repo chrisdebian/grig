@@ -31,7 +31,7 @@ if test "${ac_cv_c_compiler_gnu}" = "yes"; then
   CFLAGS="${CFLAGS} -Wall"
 fi
 
-pkg_modules="gtk+-3.0 gthread-2.0 >= 2.14.0"
+pkg_modules="gtk+-3.0 >= 3.24 gthread-2.0 >= 2.14.0"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
