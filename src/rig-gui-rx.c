@@ -251,18 +251,18 @@ float_level_cb (GtkRange *range, gpointer data)
 static gchar *
 float_format_value_cb (GtkScale *scale, gdouble value)
 {
-	return g_strdup_printf ("%0.2f", -1.0 * value);
+	return g_strdup_printf ("%0.2f", -1.0 * value + 0.0);
 }
 
 static gchar *
 sfreq_format_value_cb (GtkScale *scale, gdouble value)
 {
 	if (fabs (value) <= 999) {
-		return g_strdup_printf ("%0.0fHz", -1.0 * value);
+		return g_strdup_printf ("%0.0fHz", -1.0 * value + 0.0);
 	}
 	else {
 		value = value / 1000.0;
-		return g_strdup_printf ("%0.2fkHz", -1.0 * value);
+		return g_strdup_printf ("%0.2fkHz", -1.0 * value + 0.0);
 	}
 }
 
