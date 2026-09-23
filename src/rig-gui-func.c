@@ -46,7 +46,8 @@ extern GtkWidget *grigapp;
 
 static gint func_window_delete  (GtkWidget *widget, GdkEvent *event, gpointer data);
 static void func_window_destroy (GtkWidget *widget, gpointer data);
-static void create_controls   (GtkBox *box);
+static void create_controls   (GtkWidget *container);
+static void add_control       (GtkWidget *container, GtkWidget *widget);
 static void bool_state_cb    (GtkToggleButton *toggle_button, gpointer data);
 static gboolean func_levels_update (gpointer data);
 
@@ -85,14 +86,24 @@ rig_gui_func_create ()
 		return;
 	}
 	
-	/* create hbox and add toggle buttons */
+	/* create container and add toggle buttons */
 #if GTK_CHECK_VERSION(3,0,0)
-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
-	gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
+	/* a single homogeneous row grows wider than the screen on rigs with
+	   many functions, pushing the window's close button off-screen, so
+	   wrap the buttons onto several rows instead. Fixing the row length
+	   (min == max) matters: with only a maximum, the window opens at the
+	   flow box's narrowest layout and grows taller than the screen. */
+	hbox = gtk_flow_box_new ();
+	gtk_flow_box_set_selection_mode (GTK_FLOW_BOX (hbox), GTK_SELECTION_NONE);
+	gtk_flow_box_set_homogeneous (GTK_FLOW_BOX (hbox), TRUE);
+	gtk_flow_box_set_min_children_per_line (GTK_FLOW_BOX (hbox), 6);
+	gtk_flow_box_set_max_children_per_line (GTK_FLOW_BOX (hbox), 6);
+	gtk_flow_box_set_row_spacing (GTK_FLOW_BOX (hbox), 5);
+	gtk_flow_box_set_column_spacing (GTK_FLOW_BOX (hbox), 5);
 #else
 	hbox = gtk_hbox_new (TRUE, 5);
 #endif
-	create_controls (GTK_BOX (hbox));
+	create_controls (hbox);
 	
 	/* create dialog window */
 	title = g_strdup_printf (_("%s (Special Functions)"),
@@ -198,7 +209,7 @@ bool_state_cb (GtkToggleButton *toggle_button, gpointer data)
 }
 
 static void
-create_controls   (GtkBox *box)
+create_controls   (GtkWidget *container)
 {
 	setting_t func;
 	guint count = 0;
@@ -222,7 +233,7 @@ create_controls   (GtkBox *box)
 						G_CALLBACK (bool_state_cb),
 						GINT_TO_POINTER (func));
 
-			gtk_box_pack_start (GTK_BOX (box), fctrls[i], TRUE, TRUE, 0);
+			add_control (container, fctrls[i]);
 			count++;
 		}
 	}
@@ -231,11 +242,21 @@ create_controls   (GtkBox *box)
 	   telling user why window is empty
 	*/
 	if (count == 0) {
-		gtk_box_pack_start (box,
-				    gtk_label_new (_("Rig has no support.")),
-				    TRUE, TRUE, 0);
+		add_control (container, gtk_label_new (_("Rig has no support.")));
 	}
 
+}
+
+
+/** \brief Add a control to the function container. */
+static void
+add_control   (GtkWidget *container, GtkWidget *widget)
+{
+#if GTK_CHECK_VERSION(3,0,0)
+	gtk_container_add (GTK_CONTAINER (container), widget);
+#else
+	gtk_box_pack_start (GTK_BOX (container), widget, TRUE, TRUE, 0);
+#endif
 }
 
 static gboolean
