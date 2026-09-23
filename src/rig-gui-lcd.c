@@ -195,7 +195,10 @@ rig_gui_lcd_create ()
 #ifndef DISABLE_HW
 	if (rig_data_has_set_freq1 ()) {
 #endif
-		gtk_widget_add_events (lcd.canvas, GDK_BUTTON_PRESS_MASK);
+		/* GTK3 no longer delivers the mouse wheel as button 4/5 presses, so scroll
+		   events must be requested explicitly (touchpads then arrive as emulated
+		   up/down steps, as the handler expects) */
+		gtk_widget_add_events (lcd.canvas, GDK_BUTTON_PRESS_MASK | GDK_SCROLL_MASK);
 		g_signal_connect (G_OBJECT (lcd.canvas), "event",
                           G_CALLBACK (rig_gui_lcd_handle_event), NULL);
 #ifndef DISABLE_HW
