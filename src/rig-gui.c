@@ -112,7 +112,7 @@ rig_gui_create ()
 
 	/* horizontal box with keypad and vfo */
 
-	keypadbox = gtk_hbox_new(FALSE, 0);
+	keypadbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	gtk_box_pack_start (GTK_BOX (keypadbox), keypad,
 			    TRUE, TRUE, 0);
@@ -122,7 +122,7 @@ rig_gui_create ()
 
 	/* vertical box with lcd and keypad + vfo */
 
-	lcdbox = gtk_vbox_new (FALSE, 0);
+	lcdbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
 	gtk_box_pack_start (GTK_BOX (lcdbox), lcd,
 			    FALSE, FALSE, 0);
@@ -133,7 +133,7 @@ rig_gui_create ()
 	/* create the main container */
 	/* from left to right: buttons, smeter, (lcd + keypad), ctrl2 */
 
-	hbox = gtk_hbox_new (FALSE, 5);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
 
 	gtk_box_pack_start (GTK_BOX (hbox), rig_gui_buttons_create (),
 			    FALSE, FALSE, 0);
@@ -146,11 +146,11 @@ rig_gui_create ()
     gtk_widget_show (hbox);
 
 	/* create main vertical box */
-	vbox = gtk_vbox_new (FALSE, 0);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), grig_menubar_create (),
 			    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 5);
-	gtk_box_pack_start (GTK_BOX (vbox), gtk_hseparator_new (), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), gtk_separator_new (GTK_ORIENTATION_HORIZONTAL), FALSE, FALSE, 0);
 
 /* 	gtk_box_pack_start (GTK_BOX (vbox), rig_gui_levels_create (), */
 /* 			    FALSE, FALSE, 5); */

@@ -145,9 +145,9 @@ rig_selector_execute ()
                           _("Edit the settings for the currently selected radio."));
     
     /* button box*/
-    butbox1 = gtk_hbutton_box_new ();
+    butbox1 = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
     gtk_button_box_set_layout (GTK_BUTTON_BOX (butbox1), GTK_BUTTONBOX_START);
-    butbox2 = gtk_hbutton_box_new ();
+    butbox2 = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
     gtk_button_box_set_layout (GTK_BUTTON_BOX (butbox2), GTK_BUTTONBOX_END);
     gtk_box_set_spacing (GTK_BOX (butbox2), 10);
     gtk_container_add (GTK_CONTAINER (butbox1), newbut);
@@ -159,11 +159,11 @@ rig_selector_execute ()
     
     
     /* vertical box */
-    vbox = gtk_vbox_new (FALSE, 10);
+    vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 10);
     gtk_box_pack_start (GTK_BOX (vbox), swin, TRUE, TRUE, 0);
     gtk_box_pack_start (GTK_BOX (vbox), butbox1, FALSE, FALSE, 0);
     gtk_box_pack_end (GTK_BOX (vbox), butbox2, FALSE, FALSE, 0);
-    gtk_box_pack_end (GTK_BOX (vbox), gtk_hseparator_new (), FALSE, FALSE, 0);
+    gtk_box_pack_end (GTK_BOX (vbox), gtk_separator_new (GTK_ORIENTATION_HORIZONTAL), FALSE, FALSE, 0);
 
     /* create window */
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);

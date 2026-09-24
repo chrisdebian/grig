@@ -101,7 +101,8 @@ rig_gui_rx_create ()
 	}
 
 	/* create hbox and add sliders */
-	hbox = gtk_hbox_new (TRUE, 5);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+	gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
 	create_controls (GTK_BOX (hbox));
 	
 	/* create dialog window */
@@ -276,7 +277,7 @@ create_controls   (GtkBox *box)
 
 	/* afs */
 	if (rig_data_has_set_afg ()) {
-		afs = gtk_vscale_new_with_range (-1.0, 0.0, 0.01);
+		afs = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -1.0, 0.0, 0.01);
 		gtk_range_set_value (GTK_RANGE (afs), -1.0*rig_data_get_afg ());
 		afi = g_signal_connect (afs, "value-changed",
 					G_CALLBACK (float_level_cb),
@@ -285,9 +286,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (float_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("AF Gain"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), afs, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -296,7 +297,7 @@ create_controls   (GtkBox *box)
 
 	/* rfs */
 	if (rig_data_has_set_rfg ()) {
-		rfs = gtk_vscale_new_with_range (-1.0, 0.0, 0.01);
+		rfs = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -1.0, 0.0, 0.01);
 		gtk_range_set_value (GTK_RANGE (rfs), -1.0*rig_data_get_rfg ());
 		rfi = g_signal_connect (rfs, "value-changed",
 					G_CALLBACK (float_level_cb),
@@ -305,9 +306,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (float_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("RF Gain"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), rfs, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -317,12 +318,12 @@ create_controls   (GtkBox *box)
 	/* ifs */
 	if (rig_data_has_set_ifs ()) {
 		if (rig_data_get_ifsmax () > 0) {
-			ifs = gtk_vscale_new_with_range (-rig_data_get_ifsmax (),
+			ifs = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -rig_data_get_ifsmax (),
 							 rig_data_get_ifsmax (),
 							 10.0);
 		}
 		else {
-			ifs = gtk_vscale_new_with_range (-10000, 10000, 10);
+			ifs = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -10000, 10000, 10);
 		}
 		gtk_range_set_value (GTK_RANGE (ifs), -1.0*rig_data_get_ifs ());
 		ifi = g_signal_connect (ifs, "value-changed",
@@ -332,9 +333,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (sfreq_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("IF Shift"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), ifs, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -343,7 +344,7 @@ create_controls   (GtkBox *box)
 
 	/* cwp */
 	if (rig_data_has_set_cwpitch ()) {
-		cwp = gtk_vscale_new_with_range (-1000, -500, 10.0);
+		cwp = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -1000, -500, 10.0);
 		gtk_range_set_value (GTK_RANGE (cwp), -1.0*rig_data_get_cwpitch ());
 		cwi = g_signal_connect (cwp, "value-changed",
 					G_CALLBACK (float_level_cb),
@@ -352,9 +353,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (sfreq_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("CW Pitch"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), cwp, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -363,7 +364,7 @@ create_controls   (GtkBox *box)
 
 	/* pbti */
 	if (rig_data_has_set_pbtin ()) {
-		pbti = gtk_vscale_new_with_range (-1.0, 0.0, 0.01);
+		pbti = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -1.0, 0.0, 0.01);
 		gtk_range_set_value (GTK_RANGE (pbti), -1.0*rig_data_get_pbtin ());
 		pbii = g_signal_connect (pbti, "value-changed",
 					 G_CALLBACK (float_level_cb),
@@ -372,9 +373,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (float_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("PBT In"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), pbti, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -383,7 +384,7 @@ create_controls   (GtkBox *box)
 
 	/* pbto */
 	if (rig_data_has_set_pbtout ()) {
-		pbto = gtk_vscale_new_with_range (-1.0, 0.0, 0.01);
+		pbto = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -1.0, 0.0, 0.01);
 		gtk_range_set_value (GTK_RANGE (pbto), -1.0*rig_data_get_pbtout ());
 		pboi = g_signal_connect (pbto, "value-changed",
 					 G_CALLBACK (float_level_cb),
@@ -392,9 +393,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (float_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("PBT Out"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), pbto, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -404,7 +405,7 @@ create_controls   (GtkBox *box)
 
 	/* apf */
 	if (rig_data_has_set_apf ()) {
-		apf = gtk_vscale_new_with_range (-1.0, 0.0, 0.01);
+		apf = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -1.0, 0.0, 0.01);
 		gtk_range_set_value (GTK_RANGE (apf), -1.0*rig_data_get_apf ());
 		api = g_signal_connect (apf, "value-changed",
 					G_CALLBACK (float_level_cb),
@@ -413,9 +414,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (float_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("APF"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), apf, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -424,7 +425,7 @@ create_controls   (GtkBox *box)
 
 	/* nrs */
 	if (rig_data_has_set_nr ()) {
-		nrs = gtk_vscale_new_with_range (-1.0, 0.0, 0.01);
+		nrs = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -1.0, 0.0, 0.01);
 		gtk_range_set_value (GTK_RANGE (nrs), -1.0*rig_data_get_nr ());
 		nri = g_signal_connect (nrs, "value-changed",
 					G_CALLBACK (float_level_cb),
@@ -433,9 +434,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (float_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("N.R."));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), nrs, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -444,7 +445,7 @@ create_controls   (GtkBox *box)
 
 	/* not */
 	if (rig_data_has_set_notch ()) {
-		not = gtk_vscale_new_with_range (-3000, -500, 10.0);
+		not = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -3000, -500, 10.0);
 		gtk_range_set_value (GTK_RANGE (not), -1.0*rig_data_get_notch ());
 		noi = g_signal_connect (not, "value-changed",
 					G_CALLBACK (float_level_cb),
@@ -453,9 +454,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (sfreq_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("NOTCH"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), not, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -464,7 +465,7 @@ create_controls   (GtkBox *box)
 
 	/* sql */
 	if (rig_data_has_set_sql ()) {
-		sql = gtk_vscale_new_with_range (-1.0, 0.0, 0.01);
+		sql = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -1.0, 0.0, 0.01);
 		gtk_range_set_value (GTK_RANGE (sql), -1.0*rig_data_get_sql ());
 		sqi = g_signal_connect (sql, "value-changed",
 					G_CALLBACK (float_level_cb),
@@ -473,9 +474,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (float_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("Squelch"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), sql, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);
@@ -484,7 +485,7 @@ create_controls   (GtkBox *box)
 
 	/* bal */
 	if (rig_data_has_set_balance ()) {
-		bal = gtk_vscale_new_with_range (-1.0, 0.0, 0.01);
+		bal = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, -1.0, 0.0, 0.01);
 		gtk_range_set_value (GTK_RANGE (bal), -1.0*rig_data_get_balance ());
 		bai = g_signal_connect (bal, "value-changed",
 					G_CALLBACK (float_level_cb),
@@ -493,9 +494,9 @@ create_controls   (GtkBox *box)
 				  G_CALLBACK (float_format_value_cb),
 				  NULL);
 		label = gtk_label_new (_("Balance"));
-		gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.5);
 
-		vbox = gtk_vbox_new (FALSE, 0);
+		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), bal, TRUE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 		gtk_box_pack_start (box, vbox, TRUE, TRUE, 0);

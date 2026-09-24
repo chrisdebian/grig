@@ -73,7 +73,7 @@ rig_gui_info_run ()
 	GtkWidget *vbox3;
 	GtkWidget *vbox4;
 
-	vbox1 = gtk_vbox_new (FALSE, 5);
+	vbox1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
 	gtk_box_pack_start (GTK_BOX (vbox1), 
 			    rig_gui_info_create_if_frame (),
 			    FALSE, FALSE, 0);
@@ -84,17 +84,17 @@ rig_gui_info_run ()
 			    rig_gui_info_create_frontend_frame (),
 			    FALSE, FALSE, 0);
 
-	vbox2 = gtk_vbox_new (FALSE, 5);
+	vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
 	gtk_box_pack_start (GTK_BOX (vbox2),
 			    rig_gui_info_create_level_frame (),
 			    TRUE, TRUE, 0);
 
-	vbox3 = gtk_vbox_new (FALSE, 5);
+	vbox3 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
 	gtk_box_pack_start (GTK_BOX (vbox3), 
 			    rig_gui_info_create_func_frame (),
 			    TRUE, TRUE, 0);
 
-	vbox4 = gtk_vbox_new (FALSE, 5);
+	vbox4 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
 	gtk_box_pack_start (GTK_BOX (vbox4), 
 			    rig_gui_info_create_tunstep_frame (),
 			    FALSE, FALSE, 0);
@@ -103,7 +103,8 @@ rig_gui_info_run ()
 			    TRUE, TRUE, 0);
 
 	/* main horisontal box */
-	hbox = gtk_hbox_new (TRUE, 15);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 15);
+	gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
 
 	gtk_box_pack_start (GTK_BOX (hbox), vbox1, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
@@ -127,7 +128,7 @@ rig_gui_info_run ()
 			    FALSE, FALSE, 0);
 
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
-			    gtk_hseparator_new (),
+			    gtk_separator_new (GTK_ORIENTATION_HORIZONTAL),
 			    FALSE, FALSE, 10);
 
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
@@ -173,7 +174,7 @@ rig_gui_info_create_header ()
 	text = g_strdup ("<b>Driver Version:</b>");
 	gtk_label_set_markup (GTK_LABEL (label), text);
 	g_free (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 1.0);
 
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_grid_attach (GTK_GRID (table), label, 0, 1, 1, 1);
@@ -182,7 +183,7 @@ rig_gui_info_create_header ()
 	text = g_strdup_printf ("<b> %s</b>", myrig->caps->version);
 	gtk_label_set_markup (GTK_LABEL (label), text);
 	g_free (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_grid_attach (GTK_GRID (table), label, 1, 1, 1, 1);
@@ -192,7 +193,7 @@ rig_gui_info_create_header ()
 	text = g_strdup ("<b>Driver Status:</b>");
 	gtk_label_set_markup (GTK_LABEL (label), text);
 	g_free (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 1.0);
 
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_grid_attach (GTK_GRID (table), label, 0, 2, 1, 1);
@@ -201,7 +202,7 @@ rig_gui_info_create_header ()
 	text = g_strdup_printf ("<b> %s</b>", rig_strstatus (myrig->caps->status));
 	gtk_label_set_markup (GTK_LABEL (label), text);
 	g_free (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_grid_attach (GTK_GRID (table), label, 1, 2, 1, 1);
@@ -211,7 +212,7 @@ rig_gui_info_create_header ()
 	text = g_strdup ("<b>Driver License:</b>");
 	gtk_label_set_markup (GTK_LABEL (label), text);
 	g_free (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 1.0);
 
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_grid_attach (GTK_GRID (table), label, 0, 3, 1, 1);
@@ -220,7 +221,7 @@ rig_gui_info_create_header ()
 	text = g_strdup_printf ("<b> %s</b>", myrig->caps->copyright);
 	gtk_label_set_markup (GTK_LABEL (label), text);
 	g_free (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_grid_attach (GTK_GRID (table), label, 1, 3, 1, 1);
@@ -252,7 +253,7 @@ rig_gui_info_create_offset_frame ()
 	gtk_grid_set_column_homogeneous (GTK_GRID (table), TRUE);
 
 	label = gtk_label_new (_("RIT:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -262,7 +263,7 @@ rig_gui_info_create_offset_frame ()
 	text = g_strdup_printf ("\302\261%.2f kHz",
 				((gfloat) myrig->caps->max_rit) / 1000.0);
 	label = gtk_label_new (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -270,7 +271,7 @@ rig_gui_info_create_offset_frame ()
 	g_free (text);
 
 	label = gtk_label_new (_("XIT:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -279,7 +280,7 @@ rig_gui_info_create_offset_frame ()
 	text = g_strdup_printf ("\302\261%.2f kHz",
 				((gfloat) myrig->caps->max_xit) / 1000.0);
 	label = gtk_label_new (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -287,7 +288,7 @@ rig_gui_info_create_offset_frame ()
 	g_free (text);
 
 	label = gtk_label_new (_("IF-SHIFT:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -296,7 +297,7 @@ rig_gui_info_create_offset_frame ()
 	text = g_strdup_printf ("\302\261%.2f kHz",
 				((gfloat) myrig->caps->max_ifshift) / 1000.0);
 	label = gtk_label_new (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -342,7 +343,7 @@ rig_gui_info_create_level_frame    ()
 
 	label = gtk_label_new (NULL);
 	gtk_label_set_markup (GTK_LABEL (label), _("<b>LEVEL</b>"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -376,7 +377,7 @@ rig_gui_info_create_level_frame    ()
 
 		/* add RIG_LEVEL_STR[i] to the row i+1 */
 		label = gtk_label_new (RIG_LEVEL_STR[i]);
-		gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 		gtk_widget_set_hexpand (label, TRUE);
 		gtk_widget_set_vexpand (label, TRUE);
 		gtk_widget_set_margin_start (label, 5);
@@ -409,7 +410,7 @@ rig_gui_info_create_level_frame    ()
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swin),
 					GTK_POLICY_NEVER,
 					GTK_POLICY_ALWAYS);
-	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (swin), table);
+	gtk_container_add (GTK_CONTAINER (swin), table);
 		
 
 	return swin;
@@ -436,7 +437,7 @@ rig_gui_info_create_if_frame      ()
 
 	/* connection type */
 	label = gtk_label_new (_("Port Type:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -455,7 +456,7 @@ rig_gui_info_create_if_frame      ()
 		gtk_label_set_text (GTK_LABEL (label), _("Unknown"));
 	}
 
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -463,7 +464,7 @@ rig_gui_info_create_if_frame      ()
 
 	/* DCD */
 	label = gtk_label_new (_("DCD Type:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -482,7 +483,7 @@ rig_gui_info_create_if_frame      ()
 		gtk_label_set_text (GTK_LABEL (label), _("Unknown"));
 	}
 
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -490,7 +491,7 @@ rig_gui_info_create_if_frame      ()
 
 	/* PTT */
 	label = gtk_label_new (_("PTT Type:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -509,7 +510,7 @@ rig_gui_info_create_if_frame      ()
 		gtk_label_set_text (GTK_LABEL (label), _("Unknown"));
 	}
 
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -517,7 +518,7 @@ rig_gui_info_create_if_frame      ()
 
 	/* serial speed */
 	label = gtk_label_new (_("Serial Speed:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -536,7 +537,7 @@ rig_gui_info_create_if_frame      ()
 		gtk_label_set_text (GTK_LABEL (label), _("N/A"));
 	}
 
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -544,7 +545,7 @@ rig_gui_info_create_if_frame      ()
 
 	/* data bits */
 	label = gtk_label_new (_("Data bits:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -561,7 +562,7 @@ rig_gui_info_create_if_frame      ()
 		gtk_label_set_text (GTK_LABEL (label), _("N/A"));
 	}
 
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -569,7 +570,7 @@ rig_gui_info_create_if_frame      ()
 
 	/* stop bits */
 	label = gtk_label_new (_("Stop bits:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -586,7 +587,7 @@ rig_gui_info_create_if_frame      ()
 		gtk_label_set_text (GTK_LABEL (label), _("N/A"));
 	}
 
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -594,7 +595,7 @@ rig_gui_info_create_if_frame      ()
 
 	/* serial parity */
 	label = gtk_label_new (_("Parity:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -619,7 +620,7 @@ rig_gui_info_create_if_frame      ()
 		gtk_label_set_text (GTK_LABEL (label), _("N/A"));
 	}
 
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -627,7 +628,7 @@ rig_gui_info_create_if_frame      ()
 
 	/* serial handshake */
 	label = gtk_label_new (_("Handshake:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -652,7 +653,7 @@ rig_gui_info_create_if_frame      ()
 		gtk_label_set_text (GTK_LABEL (label), _("N/A"));
 	}
 
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -698,7 +699,7 @@ rig_gui_info_create_tunstep_frame  ()
 
 	label = gtk_label_new (NULL);
 	gtk_label_set_markup (GTK_LABEL (label), _("<b>STEP</b>"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_margin_start (label, 5);
 	gtk_grid_attach (GTK_GRID (table), label, 0, 0, 1, 1);
 
@@ -740,7 +741,7 @@ rig_gui_info_create_tunstep_frame  ()
 			/* create tuning step label */
 			text = g_strdup_printf ("%ld Hz", myrig->caps->tuning_steps[i].ts);
 			label = gtk_label_new (text);
-			gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+			gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 			gtk_widget_set_hexpand (label, TRUE);
 			gtk_widget_set_vexpand (label, TRUE);
 			gtk_widget_set_margin_start (label, 5);
@@ -773,7 +774,7 @@ rig_gui_info_create_tunstep_frame  ()
 
 			/* create label containing the modes */
 			label = gtk_label_new (text);
-			gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+			gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 			gtk_widget_set_hexpand (label, TRUE);
 			gtk_widget_set_vexpand (label, TRUE);
 			gtk_widget_set_margin_start (label, 5);
@@ -788,7 +789,7 @@ rig_gui_info_create_tunstep_frame  ()
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swin),
 					GTK_POLICY_AUTOMATIC,
 					GTK_POLICY_ALWAYS);
-	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (swin), table);
+	gtk_container_add (GTK_CONTAINER (swin), table);
 
 	return swin;
 }
@@ -815,7 +816,7 @@ rig_gui_info_create_frontend_frame ()
 	table = gtk_grid_new ();
 
 	label = gtk_label_new (_("PREAMP:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -853,7 +854,7 @@ rig_gui_info_create_frontend_frame ()
 	}
 	label = gtk_label_new (text);
 	g_free (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -861,7 +862,7 @@ rig_gui_info_create_frontend_frame ()
 
 
 	label = gtk_label_new (_("ATT:"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -897,7 +898,7 @@ rig_gui_info_create_frontend_frame ()
 	}
 	label = gtk_label_new (text);
 	g_free (text);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -943,7 +944,7 @@ rig_gui_info_create_func_frame    ()
 
 	label = gtk_label_new (NULL);
 	gtk_label_set_markup (GTK_LABEL (label), _("<b>FUNCTION</b>"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -977,7 +978,7 @@ rig_gui_info_create_func_frame    ()
 
 		/* add RIG_FUNC_STR[i] to the row i+1 */
 		label = gtk_label_new (RIG_FUNC_STR[i]);
-		gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 		gtk_widget_set_hexpand (label, TRUE);
 		gtk_widget_set_vexpand (label, TRUE);
 		gtk_widget_set_margin_start (label, 5);
@@ -1010,7 +1011,7 @@ rig_gui_info_create_func_frame    ()
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swin),
 					GTK_POLICY_NEVER,
 					GTK_POLICY_ALWAYS);
-	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (swin), table);
+	gtk_container_add (GTK_CONTAINER (swin), table);
 		
 
 	return swin;
@@ -1035,7 +1036,7 @@ rig_gui_info_create_vfo_ops_frame    ()
 
 	label = gtk_label_new (NULL);
 	gtk_label_set_markup (GTK_LABEL (label), _("<b>VFO OP</b>"));
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 	gtk_widget_set_hexpand (label, TRUE);
 	gtk_widget_set_vexpand (label, TRUE);
 	gtk_widget_set_margin_start (label, 5);
@@ -1063,7 +1064,7 @@ rig_gui_info_create_vfo_ops_frame    ()
 
 		/* add RIG_FUNC_STR[i] to the row i+1 */
 		label = gtk_label_new (RIG_OP_STR[i]);
-		gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.0);
 		gtk_widget_set_hexpand (label, TRUE);
 		gtk_widget_set_vexpand (label, TRUE);
 		gtk_widget_set_margin_start (label, 5);
@@ -1087,7 +1088,7 @@ rig_gui_info_create_vfo_ops_frame    ()
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swin),
 					GTK_POLICY_NEVER,
 					GTK_POLICY_ALWAYS);
-	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (swin), table);
+	gtk_container_add (GTK_CONTAINER (swin), table);
 		
 
 	return swin;

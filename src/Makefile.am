@@ -1,11 +1,7 @@
 ## Process this file with automake to produce Makefile.in
-# NB: don't define GDK_DISABLE_DEPRECATED/GTK_DISABLE_DEPRECATED
-#     until the code base is converted to more recent gtk.
 
 AM_CPPFLAGS = \
 	@PACKAGE_CFLAGS@ -I.. \
-	-DG_DISABLE_DEPRECATED \
-	-DGDK_PIXBUF_DISABLE_DEPRECATED \
     -DDATADIR=\""$(datadir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(datadir)/grig"\" \
 	-DPACKAGE_PIXMAPS_DIR=\""$(datadir)/pixmaps/grig"\" \
