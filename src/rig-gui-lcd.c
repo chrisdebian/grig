@@ -74,6 +74,9 @@
  *      RIT/XIT handling code.
  */
 #include <gtk/gtk.h>
+#ifdef GDK_WINDOWING_WAYLAND
+#include <gdk/gdkwayland.h>
+#endif
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <pango/pangocairo.h>
 #include <glib/gi18n.h>
@@ -130,6 +133,7 @@ static void           rig_gui_lcd_load_digits      (const gchar *fname);
 static gboolean       rig_gui_lcd_draw_cb          (GtkWidget *, cairo_t *, gpointer);
 static gboolean       rig_gui_lcd_handle_event     (GtkWidget *, GdkEvent *, gpointer);
 static event_object_t rig_gui_lcd_get_event_object (GdkEvent *event);
+static GdkScrollDirection rig_gui_lcd_scroll_step (GdkEventScroll *event);
 static void           rig_gui_lcd_calc_dim         (void);
 static void           rig_gui_lcd_draw_text        (cairo_t *cr);
 static void           rig_gui_lcd_draw_vfo_text    (cairo_t *cr);
@@ -196,9 +200,15 @@ rig_gui_lcd_create ()
 	if (rig_data_has_set_freq1 ()) {
 #endif
 		/* GTK3 no longer delivers the mouse wheel as button 4/5 presses, so scroll
-		   events must be requested explicitly (touchpads then arrive as emulated
-		   up/down steps, as the handler expects) */
+		   events must be requested explicitly */
 		gtk_widget_add_events (lcd.canvas, GDK_BUTTON_PRESS_MASK | GDK_SCROLL_MASK);
+#ifdef GDK_WINDOWING_WAYLAND
+		/* Wayland touchpads only send smooth scroll events; see
+		   rig_gui_lcd_scroll_step(). Not enabled elsewhere: on X11 it makes
+		   GTK drop the first wheel click each time the pointer enters */
+		if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (lcd.canvas)))
+			gtk_widget_add_events (lcd.canvas, GDK_SMOOTH_SCROLL_MASK);
+#endif
 		g_signal_connect (G_OBJECT (lcd.canvas), "event",
                           G_CALLBACK (rig_gui_lcd_handle_event), NULL);
 #ifndef DISABLE_HW
@@ -506,6 +516,7 @@ rig_gui_lcd_handle_event     (GtkWidget *widget,
 	shortfreq_t    deltar;     /* RIT/XIT change */
 	shortfreq_t    newrit;     /* new RIT/XIT value */
 	guint          power;      /* usd for 10**power */
+	GdkScrollDirection direction; /* scroll step, up or down */
 	gchar         *str;
 
 	switch (event->type) {
@@ -700,6 +711,13 @@ rig_gui_lcd_handle_event     (GtkWidget *widget,
 			return FALSE;
 		}
 
+		direction = rig_gui_lcd_scroll_step (&event->scroll);
+
+		/* smooth scrolling has not added up to a whole step yet */
+		if (direction == GDK_SCROLL_SMOOTH) {
+			return TRUE;
+		}
+
 		else if (object > EVENT_OBJECT_FREQ_1) {
 
 			/* RIT/XIT event;
@@ -714,7 +732,7 @@ rig_gui_lcd_handle_event     (GtkWidget *widget,
 			}
 
 			/* check which mouse button */
-			switch (event->scroll.direction) {
+			switch (direction) {
 
 				/* WHEEL UP: inrease frequency */
 			case GDK_SCROLL_UP:
@@ -774,7 +792,7 @@ rig_gui_lcd_handle_event     (GtkWidget *widget,
 			}
 
 			/* check which mouse button */
-			switch (event->scroll.direction) {
+			switch (direction) {
 
 				/* WHEEL UP: inrease frequency */
 			case GDK_SCROLL_UP:
@@ -822,6 +840,54 @@ rig_gui_lcd_handle_event     (GtkWidget *widget,
 	}
 
 	return FALSE;
+}
+
+
+
+/** \brief Turn a scroll event into a single tuning step.
+ *  \param event The scroll event.
+ *  \return GDK_SCROLL_UP or GDK_SCROLL_DOWN for one step, or
+ *          GDK_SCROLL_SMOOTH when no step should be taken yet.
+ *
+ * A mouse wheel gives one step per click. Touchpads send many small
+ * smooth-scroll deltas, so these are added up and a step is taken each
+ * time the total reaches a whole unit (a mouse wheel click is one unit
+ * when it is delivered as smooth scrolling too). The total is cleared
+ * when the direction reverses or the scroll gesture ends.
+ */
+static GdkScrollDirection
+rig_gui_lcd_scroll_step (GdkEventScroll *event)
+{
+	static gdouble total = 0.0;
+	gdouble        dx, dy;
+
+	if (event->direction != GDK_SCROLL_SMOOTH)
+		return event->direction;
+
+	if (gdk_event_is_scroll_stop_event ((GdkEvent *) event)) {
+		total = 0.0;
+		return GDK_SCROLL_SMOOTH;
+	}
+
+	gdk_event_get_scroll_deltas ((GdkEvent *) event, &dx, &dy);
+
+	/* start again when the direction reverses */
+	if ((dy > 0.0 && total < 0.0) || (dy < 0.0 && total > 0.0))
+		total = 0.0;
+
+	total += dy;
+
+	/* positive deltas scroll down */
+	if (total >= 1.0) {
+		total -= 1.0;
+		return GDK_SCROLL_DOWN;
+	}
+	if (total <= -1.0) {
+		total += 1.0;
+		return GDK_SCROLL_UP;
+	}
+
+	return GDK_SCROLL_SMOOTH;
 }
 
 
