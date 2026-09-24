@@ -108,20 +108,20 @@ grig_vpixmap_button (const gchar *file, const gchar *text, const gchar *tooltip)
 }
 
 
-/** \brief Create a horizontal pixmap button using stock pixmap.
+/** \brief Create a horizontal pixmap button using a themed icon.
  *
  * The text will be placed to the right of the image.
  * The icon size will be GTK_ICON_SIZE_BUTTON.
  */
 GtkWidget *
-grig_hstock_button (const gchar *stock_id, const gchar *text, const gchar *tooltip)
+grig_hstock_button (const gchar *icon_name, const gchar *text, const gchar *tooltip)
 {
     GtkWidget *button;
     GtkWidget *image;
     GtkWidget *box;
     
 
-    image = gtk_image_new_from_stock (stock_id, GTK_ICON_SIZE_BUTTON);
+    image = gtk_image_new_from_icon_name (icon_name, GTK_ICON_SIZE_BUTTON);
     box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start (GTK_BOX (box), image, TRUE, TRUE, 0);
     if (text != NULL)

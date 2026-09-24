@@ -115,7 +115,7 @@ rig_gui_info_run ()
 	/* create dialog and add hbox */
 	dialog = gtk_dialog_new_with_buttons (_("Radio Info"), GTK_WINDOW (grigapp),
 					      GTK_DIALOG_DESTROY_WITH_PARENT,
-					      GTK_STOCK_CLOSE, GTK_RESPONSE_NONE, NULL);
+					      _("_Close"), GTK_RESPONSE_NONE, NULL);
   
 	/* Ensure that the dialog box is destroyed when the user responds. */
 	g_signal_connect_swapped (dialog,

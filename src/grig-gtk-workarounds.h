@@ -41,7 +41,7 @@ GtkWidget *grig_vpixmap_button (const gchar *file,
                                 const gchar *text,
                                 const gchar *tooltip);
 
-GtkWidget *grig_hstock_button  (const gchar *stock_id,
+GtkWidget *grig_hstock_button  (const gchar *icon_name,
                                 const gchar *text,
                                 const gchar *tooltip);
 

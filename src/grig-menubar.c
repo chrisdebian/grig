@@ -63,26 +63,26 @@ static GtkActionEntry entries[] = {
 	{ "HelpMenu", NULL, N_("_Help") },
 
 	/* FileMenu */
-	{ "Info", GTK_STOCK_DND, N_("_Info"), "<control>I", N_("Show info about radio"), G_CALLBACK (rig_gui_info_run) },
-	{ "Stop", GTK_STOCK_STOP, N_("St_op daemon"), NULL, N_("Stop the Grig daemon"), NULL },
-	{ "Start", GTK_STOCK_EXECUTE, N_("St_art daemon"), NULL, N_("Start the Grig daemon"), NULL },
-	{ "Save", GTK_STOCK_SAVE, N_("_Save State"), "<control>S", N_("Save the state of the rig to a file"), G_CALLBACK (rig_state_save_cb) },
-	{ "Load", GTK_STOCK_OPEN, N_("_Load State"), "<control>O", N_("Load the state of the rig from a file"), G_CALLBACK (rig_state_load_cb) },
-	{ "Exit", GTK_STOCK_QUIT, N_("E_xit"), "<control>Q", N_("Exit the program"), G_CALLBACK (grig_menu_app_exit) },
+	{ "Info", NULL, N_("_Info"), "<control>I", N_("Show info about radio"), G_CALLBACK (rig_gui_info_run) },
+	{ "Stop", "process-stop", N_("St_op daemon"), NULL, N_("Stop the Grig daemon"), NULL },
+	{ "Start", "system-run", N_("St_art daemon"), NULL, N_("Start the Grig daemon"), NULL },
+	{ "Save", "document-save", N_("_Save State"), "<control>S", N_("Save the state of the rig to a file"), G_CALLBACK (rig_state_save_cb) },
+	{ "Load", "document-open", N_("_Load State"), "<control>O", N_("Load the state of the rig from a file"), G_CALLBACK (rig_state_load_cb) },
+	{ "Exit", "application-exit", N_("E_xit"), "<control>Q", N_("Exit the program"), G_CALLBACK (grig_menu_app_exit) },
 
 	/* SettingsMenu */
-	{ "Debug", GTK_STOCK_HARDDISK, N_("_Debug Level"), NULL, N_("Set Hamlib debug level"), NULL },
+	{ "Debug", "drive-harddisk", N_("_Debug Level"), NULL, N_("Set Hamlib debug level"), NULL },
 
 	/* ViewMenu */
-	{ "MsgWin", GTK_STOCK_JUSTIFY_LEFT, N_("Message _Window"), NULL, N_("Show window with debug messages"), G_CALLBACK (rig_gui_message_window_show) },
+	{ "MsgWin", "format-justify-left", N_("Message _Window"), NULL, N_("Show window with debug messages"), G_CALLBACK (rig_gui_message_window_show) },
 
 	/* ToolsMenu */
 	{ "Mem", NULL, N_("_SW Memory"), NULL, N_("Software Memory Manager"), NULL },
-	{ "BandMap", GTK_STOCK_INDEX, N_("_Band Map"), NULL, N_("Show the band map"), NULL },
-	{ "Spectrum", GTK_STOCK_JUMP_TO, N_("S_pectrum Scope"), NULL, N_("Show the spectrum scope"), NULL },
+	{ "BandMap", NULL, N_("_Band Map"), NULL, N_("Show the band map"), NULL },
+	{ "Spectrum", "go-jump", N_("S_pectrum Scope"), NULL, N_("Show the spectrum scope"), NULL },
 
 	/* HelpMenu */
-	{ "About", GTK_STOCK_ABOUT, N_("_About Grig"), NULL, N_("Show about dialog"), G_CALLBACK (grig_about_run) },
+	{ "About", "help-about", N_("_About Grig"), NULL, N_("Show about dialog"), G_CALLBACK (grig_about_run) },
 };
 
 
@@ -102,7 +102,7 @@ static GtkToggleActionEntry toggle_entries[] =
 	{ "LevelsRX", NULL, N_("_RX Level Controls"), NULL, N_("Show receiver level controls"), G_CALLBACK (rx_window_cb) },
 	{ "LevelsTX", NULL, N_("_TX Level Controls"), NULL, N_("Show transmitter level controls"), G_CALLBACK (tx_window_cb) },
 	{ "Tones", NULL, N_("_DCS/CTCSS"), NULL, N_("Show DCS and CTCSS controls"), NULL },
-	{ "Func", GTK_STOCK_DIALOG_INFO, N_("_Special Functions"), NULL, N_("Radio specific functions"), G_CALLBACK (func_window_cb) },
+	{ "Func", "dialog-information", N_("_Special Functions"), NULL, N_("Radio specific functions"), G_CALLBACK (func_window_cb) },
 };
 
 

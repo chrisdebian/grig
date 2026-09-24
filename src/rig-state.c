@@ -130,8 +130,8 @@ rig_state_load_cb (GtkWidget *widget, gpointer data)
 	dialog = gtk_file_chooser_dialog_new (_("Load Rig State"),
 					      GTK_WINDOW (grigapp),
 					      GTK_FILE_CHOOSER_ACTION_OPEN,
-					      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					      _("_Cancel"), GTK_RESPONSE_CANCEL,
+					      _("_Open"), GTK_RESPONSE_ACCEPT,
 					      NULL);
 
 	/* Add filters for .rig files and all files */
@@ -253,8 +253,8 @@ rig_state_save_cb (GtkWidget *widget, gpointer data)
 	dialog = gtk_file_chooser_dialog_new (_("Save Rig State"),
 					      GTK_WINDOW (grigapp),
 					      GTK_FILE_CHOOSER_ACTION_SAVE,
-					      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					      _("_Cancel"), GTK_RESPONSE_CANCEL,
+					      _("_Open"), GTK_RESPONSE_ACCEPT,
 					      NULL);
 
 	/* Add filters for .rig files and all files */

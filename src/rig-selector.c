@@ -110,7 +110,7 @@ rig_selector_execute ()
     gtk_tree_selection_set_mode (sel, GTK_SELECTION_SINGLE);
     
     /* connect button */
-    conbut = gtk_button_new_from_stock (GTK_STOCK_CONNECT);
+    conbut = gtk_button_new_with_mnemonic (_("_Connect"));
     gtk_widget_set_sensitive (conbut, FALSE);
     gtk_widget_set_tooltip_text (conbut,
                           _("Connect to the selected radio."
@@ -120,12 +120,12 @@ rig_selector_execute ()
                             "window will be loaded."));
     
     /* cancel button */
-    cancbut = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
+    cancbut = gtk_button_new_with_mnemonic (_("_Cancel"));
     gtk_widget_set_tooltip_text (cancbut,
                           _("Cancel radio selection. This will end grig."));
     
     /* add button */
-    newbut = gtk_button_new_from_stock (GTK_STOCK_ADD);
+    newbut = gtk_button_new_with_mnemonic (_("_Add"));
     gtk_widget_set_tooltip_text (newbut,
                           _("Add a new radio to the list."
                             "A new configuration window will be shown allowing "
@@ -133,13 +133,13 @@ rig_selector_execute ()
                             "settings."));
     
     /* delete button */
-    delbut = gtk_button_new_from_stock (GTK_STOCK_DELETE);
+    delbut = gtk_button_new_with_mnemonic (_("_Delete"));
     gtk_widget_set_sensitive (delbut, FALSE);
     gtk_widget_set_tooltip_text (delbut,
                           _("Delete the currently selected radio."));
     
     /* edit button */
-    editbut = gtk_button_new_from_stock (GTK_STOCK_EDIT);
+    editbut = gtk_button_new_with_mnemonic (_("_Edit"));
     gtk_widget_set_sensitive (editbut, FALSE);
     gtk_widget_set_tooltip_text (editbut,
                           _("Edit the settings for the currently selected radio."));

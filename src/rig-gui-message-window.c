@@ -162,11 +162,11 @@ rig_gui_message_window_init  ()
 		window = gtk_dialog_new_with_buttons (_("Grig Message Window"),
 						      NULL,
 						      GTK_DIALOG_DESTROY_WITH_PARENT,
-						      GTK_STOCK_OPEN,
+						      _("_Open"),
 						      GTK_RESPONSE_YES,  /* cheating */
-						      GTK_STOCK_CLEAR,
+						      _("_Clear"),
 						      GTK_RESPONSE_NO,   /* cheating */
-						      GTK_STOCK_CLOSE,
+						      _("_Close"),
 						      GTK_RESPONSE_CLOSE,
 						      NULL);
 		
@@ -407,8 +407,8 @@ load_debug_file ()
 	dialog = gtk_file_chooser_dialog_new (_("Open Debug File"),
 					      GTK_WINDOW (grigapp),
 					      GTK_FILE_CHOOSER_ACTION_OPEN,
-					      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					      _("_Cancel"), GTK_RESPONSE_CANCEL,
+					      _("_Open"), GTK_RESPONSE_ACCEPT,
 					      NULL);
 
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
