@@ -87,7 +87,6 @@ rig_gui_func_create ()
 	}
 	
 	/* create container and add toggle buttons */
-#if GTK_CHECK_VERSION(3,0,0)
 	/* a single homogeneous row grows wider than the screen on rigs with
 	   many functions, pushing the window's close button off-screen, so
 	   wrap the buttons onto several rows instead. Fixing the row length
@@ -100,9 +99,6 @@ rig_gui_func_create ()
 	gtk_flow_box_set_max_children_per_line (GTK_FLOW_BOX (hbox), 6);
 	gtk_flow_box_set_row_spacing (GTK_FLOW_BOX (hbox), 5);
 	gtk_flow_box_set_column_spacing (GTK_FLOW_BOX (hbox), 5);
-#else
-	hbox = gtk_hbox_new (TRUE, 5);
-#endif
 	create_controls (hbox);
 	
 	/* create dialog window */
@@ -126,9 +122,6 @@ rig_gui_func_create ()
 			  G_CALLBACK (func_window_destroy), NULL);
 
 
-	/* GtkDialog's vbox field is private in GTK3; gtk_dialog_get_content_area()
-	   has been available since GTK 2.14, well below this project's 2.24.0
-	   floor, so no GTK_CHECK_VERSION branch is needed here. */
 	gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), hbox);
 
 	visible = TRUE;
@@ -252,11 +245,7 @@ create_controls   (GtkWidget *container)
 static void
 add_control   (GtkWidget *container, GtkWidget *widget)
 {
-#if GTK_CHECK_VERSION(3,0,0)
 	gtk_container_add (GTK_CONTAINER (container), widget);
-#else
-	gtk_box_pack_start (GTK_BOX (container), widget, TRUE, TRUE, 0);
-#endif
 }
 
 static gboolean
